@@ -83,39 +83,30 @@ class SubForm: UIStackView, Validatable {
 
 extension ViewController: Validatable {
     func validate() -> Observable<ValidateResult> {
-        return Observable.create { [weak self] observer in
-            guard let self = self else { return Disposables.create() }
-            
-            let subFormValidate = self.subFormSwitch.rx.isOn.flatMapLatest { isOn -> Observable<ValidateResult> in
-                return isOn ? self.subForm.validate() : .just(.valid)
+        let subFormValidate = self.subFormSwitch.rx.isOn.flatMapLatest { isOn -> Observable<ValidateResult> in
+            return isOn ? self.subForm.validate() : .just(.valid)
+        }
+        
+        return Observable<ValidateResult>.combineLatest([
+            self.emailTextView.validate(),
+            self.telTextView.validate(),
+            subFormValidate
+        ]).map { allResult -> ValidateResult in
+            if let nonValid = allResult.first(where: { result in
+                result.isValidate == false
+            }) {
+                return nonValid
+            } else {
+                return .valid
             }
-            
-            let allField = Observable<ValidateResult>.combineLatest([
-                self.emailTextView.validate(),
-                self.telTextView.validate(),
-                subFormValidate
-            ]).map { allResult -> ValidateResult in
-                if let nonValid = allResult.first(where: { result in
-                    result.isValidate == false
-                }) {
-                    return nonValid
-                } else {
-                    return .valid
-                }
-            }
-            
-            return allField.bind(to: observer)
         }
     }
 }
 
 extension UITextField: Validatable {
     func validate() -> Observable<ValidateResult> {
-        return Observable.create { [weak self] observer in
-            guard let self = self else { return Disposables.create() }
-            return self.rx.text.map { text -> ValidateResult in
-                return text?.isEmpty == true ? .invalid("\(self.placeholder ?? "Textfield") isEmpty") : .valid
-            }.bind(to: observer)
+        return self.rx.text.map { text -> ValidateResult in
+            return text?.isEmpty == true ? .invalid("\(self.placeholder ?? "Textfield") isEmpty") : .valid
         }
     }
 }
