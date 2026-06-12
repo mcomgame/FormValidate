@@ -56,9 +56,29 @@ class ViewController: UIViewController {
 }
 
 
-class SubForm: UIStackView {
+class SubForm: UIStackView, Validatable {
     @IBOutlet weak var firstName: UITextField!
     @IBOutlet weak var lastName: UITextField!
+    func validate() -> Observable<ValidateResult> {
+        return Observable.create { [weak self] observer in
+            guard let self = self else { return Disposables.create() }
+            
+            let allField = Observable<ValidateResult>.combineLatest([
+                self.firstName.validate(),
+                self.lastName.validate(),
+            ]).map { allResult -> ValidateResult in
+                if let nonValid = allResult.first(where: { result in
+                    result.isValidate == false
+                }) {
+                    return nonValid
+                } else {
+                    return .valid
+                }
+            }
+            
+            return allField.bind(to: observer)
+        }
+    }
 }
 
 extension ViewController: Validatable {
@@ -66,9 +86,14 @@ extension ViewController: Validatable {
         return Observable.create { [weak self] observer in
             guard let self = self else { return Disposables.create() }
             
+            let subFormValidate = self.subFormSwitch.rx.isOn.flatMapLatest { isOn -> Observable<ValidateResult> in
+                return isOn ? self.subForm.validate() : .just(.valid)
+            }
+            
             let allField = Observable<ValidateResult>.combineLatest([
                 self.emailTextView.validate(),
                 self.telTextView.validate(),
+                subFormValidate
             ]).map { allResult -> ValidateResult in
                 if let nonValid = allResult.first(where: { result in
                     result.isValidate == false
