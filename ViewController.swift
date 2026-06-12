@@ -114,9 +114,8 @@ extension UITextField: Validatable {
         return Observable.create { [weak self] observer in
             guard let self = self else { return Disposables.create() }
             return self.rx.text.map { text -> ValidateResult in
-                return text?.isEmpty == true ? .invalid("isEmpty") : .valid
+                return text?.isEmpty == true ? .invalid("\(self.placeholder ?? "Textfield") isEmpty") : .valid
             }.bind(to: observer)
         }
     }
 }
-
