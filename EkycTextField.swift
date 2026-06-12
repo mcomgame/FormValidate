@@ -1,12 +1,5 @@
-//
-//  EkycTextField.swift
-//  KPayCustomer
-//
-//  Created by gusguz on 15/3/2564 BE.
-//  Copyright © 2564 KTB. All rights reserved.
-//
-
 import Foundation
+import JVFloatLabeledTextField
 import RxSwift
 import RxCocoa
 import UIKit
@@ -19,14 +12,14 @@ enum StyleTextField: Int {
     case plainText
 }
 
-open class EkycTextField: UITextField {
+open class EkycTextField: JVFloatLabeledTextField {
     var disposeBag = DisposeBag()
     var styleTextField: StyleTextField? = .ekyc
     private var _rightViewWidth: CGFloat = 0
     private var _rightViewHeight: CGFloat = 0
     private var rightImage: UIImage?
     var rightImageView = UIImageView()
-    var enableErrorMode = true
+    var enableErrorMode = false
 
     private var extensionHeight: CGFloat = 0
     var defaultCornerRadius: CGFloat = 5
@@ -37,9 +30,9 @@ open class EkycTextField: UITextField {
         }
     }
     //    var currentBorderColor
-    public var activeBorderColor = UIColor(hex: "4457e3")
-    public var defaultBorderColor = UIColor(hex: "e0e0e0")
-    public var defaultErrorColor = UIColor(hex: "db0000")
+    public var activeBorderColor = UIColor.blue
+    public var defaultBorderColor = UIColor.gray
+    public var defaultErrorColor = UIColor.red
 
     private var isValidated: Bool {
         get {
@@ -76,18 +69,6 @@ open class EkycTextField: UITextField {
     }
 
     public func setValidateType(type: ValidateType) {
-        switch type {
-        case .mobile:
-            validateFunction = mobileValidate
-        case .phone:
-            validateFunction = phoneValidate
-        case .email:
-            validateFunction = emailValidate
-        case .laserId:
-            validateFunction = isValidLaserCode
-        case .citizenId:
-            validateFunction = citizenValidate
-        }
     }
 
     @IBInspectable var textFieldStyle: Int {
@@ -151,54 +132,16 @@ open class EkycTextField: UITextField {
             autocorrectionType = .no
         }
         switch styleTextField {
-        case .ekyc:
-            confixTextField(
-                floatingYPadding: 7,
-                placeholderYPadding: 5,
-                borderWidth: 1,
-                borderColor: UIColor(hex: "e0e0e0"),
-                cornerRadius: 8,
-                placeholderColor: UIColor(hex: "838383"),
-                paddingLeft: 16,
-                colorActive: UIColor(hex: "4457e3")
-            )
-        case .health:
-            self.floatingLabelFont = UIFont.kanitRegular(ofSize: 14.0)
-            self.tintColor = UIColor._3ca982
-            if !(self.floatingLabel.text?.isEmpty ?? false) {
-                self.floatingLabelTextColor = UIColor._3ca982
-            }
-            confixTextField(
-                floatingYPadding: 7,
-                placeholderYPadding: 5,
-                borderWidth: 1,
-                borderColor: UIColor._e0e0e0,
-                cornerRadius: 8,
-                placeholderColor: UIColor._838383,
-                paddingLeft: 16,
-                colorActive: UIColor._3ca982
-            )
-        case .plainText:
-            confixTextField(
-                floatingYPadding: 0,
-                placeholderYPadding: 0,
-                borderWidth: 0,
-                borderColor: .clear,
-                cornerRadius: 0,
-                placeholderColor: UIColor._f2f2f2,
-                paddingLeft: 0,
-                colorActive: UIColor.clear
-            )
         default:
             confixTextField(
                 floatingYPadding: 7,
                 placeholderYPadding: 5,
                 borderWidth: 1,
-                borderColor: UIColor(hex: "F2F2F2"),
+                borderColor: .lightGray,
                 cornerRadius: 8,
-                placeholderColor: UIColor(hex: "838383"),
+                placeholderColor: .gray,
                 paddingLeft: 16,
-                colorActive: UIColor(hex: "4457e3")
+                colorActive: .blue
             )
         }
     }
@@ -223,7 +166,7 @@ open class EkycTextField: UITextField {
         
         var frame = errorLable.frame
         let width = self.frame.width - frame.origin.x
-        let height = (errorText?.computeStringHeight(width, errorLable.font) ?? 17) + 5
+        let height = 22.0
         frame.size.width = width
         frame.size.height = height
         errorLable.frame = frame
@@ -341,50 +284,5 @@ open class EkycTextField: UITextField {
         bpath.addClip()
         color.set()
         bpath.stroke()
-    }
-}
-
-public extension EkycTextField {
-    func mobileValidate(text: String?) -> String? {
-        guard let text = text, !text.isEmpty else { return nil }
-        let phone = text.removeDashAndSpace()
-        if let phoneType = PhoneStringType(text: phone), phoneType == .cellPhone {
-            return nil
-        }
-        return "รูปแบบเบอร์มือถือไม่ถูกต้อง"
-    }
-
-    func phoneValidate(text: String?) -> String? {
-        guard let text = text, !text.isEmpty else { return nil }
-        let phone = text.removeDashAndSpace()
-        if let phoneType = PhoneStringType(text: phone) {
-            return nil
-        }
-        return "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง"
-    }
-
-    func citizenValidate(text: String?) -> String? {
-        guard let text = text, !text.isEmpty else { return nil }
-        if text.removeDashAndSpace().citizenIdValidate() {
-            return nil
-        }
-        return "รูปแบบเลขบัตรประชาชนไม่ถูกต้อง"
-    }
-
-    func isValidLaserCode(text: String?) -> String? {
-        guard let text = text, !text.isEmpty else { return nil }
-        let laserCode = text.removeDashAndSpace()
-        if RegularExpression.laserCardCitizen.isValid(comparedString: laserCode) {
-            return nil
-        }
-        return "รูปแบบรหัสหลังบัตรประชาชนไม่ถูกต้อง"
-    }
-
-    func emailValidate(text: String?) -> String? {
-        guard let email = text, !email.isEmpty else { return nil }
-        if  RegularExpression.email.isValid(comparedString: email) {
-            return nil
-        }
-        return "รูปแบบอีเมลไม่ถูกต้อง"
     }
 }
