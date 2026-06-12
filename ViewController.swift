@@ -75,8 +75,6 @@ class SubForm: UIStackView, Validatable {
                     return .valid
                 }
             }
-            
-            return allField.bind(to: observer)
         }
     }
 }
