@@ -60,20 +60,16 @@ class SubForm: UIStackView, Validatable {
     @IBOutlet weak var firstName: UITextField!
     @IBOutlet weak var lastName: UITextField!
     func validate() -> Observable<ValidateResult> {
-        return Observable.create { [weak self] observer in
-            guard let self = self else { return Disposables.create() }
-            
-            let allField = Observable<ValidateResult>.combineLatest([
-                self.firstName.validate(),
-                self.lastName.validate(),
-            ]).map { allResult -> ValidateResult in
-                if let nonValid = allResult.first(where: { result in
-                    result.isValidate == false
-                }) {
-                    return nonValid
-                } else {
-                    return .valid
-                }
+        return Observable<ValidateResult>.combineLatest([
+            self.firstName.validate(),
+            self.lastName.validate(),
+        ]).map { allResult -> ValidateResult in
+            if let nonValid = allResult.first(where: { result in
+                result.isValidate == false
+            }) {
+                return nonValid
+            } else {
+                return .valid
             }
         }
     }
