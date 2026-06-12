@@ -49,9 +49,9 @@ class ViewController: UIViewController {
         }.disposed(by: disposeBag)
     }
     
-    func setEnableButton( isEnable: Bool ) {
+    func setEnableButton( isEnable: Bool, inValidString: String? = "Not Valid" ) {
         nextButton.backgroundColor = isEnable ? .systemBlue : .systemPink
-        nextButton.setTitle( isEnable ? "Enable" : "Not Valid" , for: .normal)
+        nextButton.setTitle( isEnable ? "Valid" : inValidString , for: .normal)
     }
 }
 
