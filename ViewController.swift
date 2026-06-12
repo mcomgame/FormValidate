@@ -94,4 +94,3 @@ extension UITextField: Validatable {
         }
     }
 }
-
