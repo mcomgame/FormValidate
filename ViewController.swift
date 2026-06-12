@@ -45,7 +45,7 @@ class ViewController: UIViewController {
         
         validate().bind { [weak self] result in
             print("update \(result)")
-            self?.setEnableButton(isEnable: result.isValidate )
+            self?.setEnableButton(isEnable: result.isValidate, inValidString: result.message )
         }.disposed(by: disposeBag)
     }
     
@@ -70,9 +70,9 @@ extension ViewController: Validatable {
                 self.emailTextView.validate(),
                 self.telTextView.validate(),
             ]).map { allResult -> ValidateResult in
-                if let nonValid = allResult.first { result in
+                if let nonValid = allResult.first(where: { result in
                     result.isValidate == false
-                } {
+                }) {
                     return nonValid
                 } else {
                     return .valid
