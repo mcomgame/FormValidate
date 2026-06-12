@@ -55,3 +55,14 @@ class SubForm: UIStackView {
     @IBOutlet weak var firstName: UITextField!
     @IBOutlet weak var lastName: UITextField!
 }
+
+extension UITextField: Validatable {
+    func validate() -> Observable<ValidateResult> {
+        return Observable.create { [weak self] observer in
+            guard let self = self else { return Disposables.create() }
+            return self.rx.text.map { text -> ValidateResult in
+                return text?.isEmpty == true ? .invalid("\(self.placeholder ?? "Textfield") isEmpty") : .valid
+            }.bind(to: observer)
+        }
+    }
+}
